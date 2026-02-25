@@ -1,18 +1,20 @@
 FROM php:8.4-cli-bookworm
 
-# System deps (libicu-dev for ext-intl)
+# System deps (matching reyemtech/sail extensions)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git ssh-client unzip curl sqlite3 libsqlite3-dev \
-    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    libpng-dev libjpeg62-turbo-dev libfreetype6-dev libwebp-dev \
     libzip-dev libxml2-dev libcurl4-openssl-dev \
-    libpq-dev libonig-dev libicu-dev gettext-base sudo \
+    libpq-dev libonig-dev libicu-dev libsodium-dev \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
-# PHP extensions (including intl for Filament)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+# PHP extensions (matching reyemtech/sail)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
-    pdo_mysql pdo_pgsql pdo_sqlite \
-    gd zip mbstring xml curl bcmath pcntl intl
+    pdo_mysql pdo_pgsql pdo_sqlite pgsql \
+    gd zip mbstring xml curl bcmath pcntl intl \
+    exif opcache sodium
 
 # Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
