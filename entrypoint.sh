@@ -38,6 +38,12 @@ if ! composer install --no-interaction --no-progress --prefer-dist 2>&1; then
 fi
 npm ci 2>/dev/null || npm install 2>/dev/null || echo "WARNING: npm install failed. Claude Code will handle this."
 
+# Setup Laravel environment
+if [ -f .env.example ] && [ ! -f .env ]; then
+  cp .env.example .env
+fi
+php artisan key:generate --force 2>/dev/null || true
+
 # Best-effort baseline (non-fatal)
 echo "Running baseline verification..."
 /skill/scripts/verify-full.sh 2>&1 | tee /output/baseline.log || echo "WARNING: Baseline verification had failures (expected pre-upgrade)."
