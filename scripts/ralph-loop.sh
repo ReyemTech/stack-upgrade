@@ -9,7 +9,7 @@ while [ $RESTARTS -lt $MAX_RESTARTS ]; do
   echo "$(date -u +%Y-%m-%dT%H:%M) ralph: launching Claude Code (attempt $((RESTARTS + 1))/$((MAX_RESTARTS + 1)))"
 
   claude --dangerously-skip-permissions \
-    --print \
+    --verbose \
     -p "$(cat /skill/kickoff-prompt.txt)" \
     || true
 
