@@ -23,13 +23,19 @@ git clone "$REPO_URL" /workspace
 cd /workspace
 git checkout -b "upgrade/laravel-${TARGET_LARAVEL}"
 
-# Install current deps + baseline
+# Best-effort dependency install (non-fatal — Claude Code will fix deps)
 echo "Installing current dependencies..."
-composer install --no-interaction --no-progress --quiet || composer update --no-interaction --no-progress --quiet
-npm ci --silent 2>/dev/null || true
+if ! composer install --no-interaction --no-progress 2>&1; then
+  echo "composer install failed, trying composer update..."
+  if ! composer update --no-interaction --no-progress 2>&1; then
+    echo "WARNING: Dependency install failed. Claude Code will handle this."
+  fi
+fi
+npm ci 2>/dev/null || npm install 2>/dev/null || echo "WARNING: npm install failed. Claude Code will handle this."
 
+# Best-effort baseline (non-fatal)
 echo "Running baseline verification..."
-/skill/scripts/verify-full.sh 2>&1 | tee /output/baseline.log || true
+/skill/scripts/verify-full.sh 2>&1 | tee /output/baseline.log || echo "WARNING: Baseline verification had failures (expected pre-upgrade)."
 
 # Drop templates with variable substitution
 export UPGRADE_DATE=$(date -u +%Y-%m-%d)
@@ -37,8 +43,9 @@ envsubst < /skill/templates/plan.md > plan.md
 envsubst < /skill/templates/checklist.yaml > checklist.yaml
 cp /skill/templates/run-log.md run-log.md
 cp /skill/templates/CLAUDE.md CLAUDE.md
-cp /skill/scripts/verify-fast.sh scripts/verify-fast.sh 2>/dev/null || { mkdir -p scripts && cp /skill/scripts/verify-fast.sh scripts/; }
-cp /skill/scripts/verify-full.sh scripts/verify-full.sh 2>/dev/null || { mkdir -p scripts && cp /skill/scripts/verify-full.sh scripts/; }
+mkdir -p scripts
+cp /skill/scripts/verify-fast.sh scripts/verify-fast.sh
+cp /skill/scripts/verify-full.sh scripts/verify-full.sh
 chmod +x scripts/verify-*.sh
 
 # Initial commit with upgrade scaffolding
