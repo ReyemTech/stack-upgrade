@@ -221,3 +221,11 @@ After a run, the `/output` volume contains:
 ## License
 
 [Business Source License 1.1](LICENSE) — You may use this software for any purpose except providing a commercial hosted service that runs it on behalf of third parties. Each release converts to Apache 2.0 four years after its release date.
+
+---
+
+<p align="center">
+  <a href="https://www.reyem.tech">
+    <img src="https://www.reyem.tech/images/logo-light-tagline.webp" alt="ReyemTech" width="200">
+  </a>
+</p>
