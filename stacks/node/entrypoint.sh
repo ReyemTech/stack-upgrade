@@ -17,7 +17,7 @@ if [ -n "$GIT_SSH_KEY_B64" ]; then
   chmod 600 ~/.ssh/id_ed25519
   ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
 elif [ -n "$GH_TOKEN" ]; then
-  git config --global credential.helper '!f() { echo "password=$GH_TOKEN"; }; f'
+  git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
   if echo "$REPO_URL" | grep -q '^git@'; then
     REPO_URL=$(echo "$REPO_URL" | sed 's|^git@github.com:|https://github.com/|; s|\.git$||').git
   fi
