@@ -1,3 +1,79 @@
-# CRA Upgrade Checklist
-# Phase 2 will populate with real phases
-phases: []
+# CRA to Vite Migration Checklist
+# Generated: ${UPGRADE_DATE}
+
+phases:
+  - id: 1
+    name: Viject Scaffold
+    status: not_started
+    description: Run npx viject to scaffold Vite config, or apply manual fallback if viject fails
+    acceptance:
+      - viject completed or manual scaffold applied
+      - vite.config.ts (or .js) present in project root
+      - npm install (or pnpm/yarn install) succeeds
+      - index.html relocated to project root
+
+  - id: 2
+    name: Env Var Rewrite
+    status: not_started
+    description: Rewrite all REACT_APP_ references to VITE_ prefix in source files and .env files
+    acceptance:
+      - grep -r REACT_APP_ src/ returns no results
+      - grep -r REACT_APP_ .env* returns no results
+      - all import.meta.env.VITE_X references match updated .env keys
+
+  - id: 3
+    name: Index HTML Relocation
+    status: not_started
+    description: Verify index.html is in project root with correct module script tag and no %PUBLIC_URL%
+    acceptance:
+      - index.html present in project root (not public/)
+      - index.html contains script type="module" tag pointing to src/index entry
+      - no %PUBLIC_URL% references in index.html
+
+  - id: 4
+    name: SVG Import Configuration
+    status: not_started
+    description: Configure vite-plugin-svgr if SVGs are imported as React components
+    acceptance:
+      - SVG imports work without errors (if applicable)
+      - vite build passes without SVG-related errors
+      - vite-plugin-svgr installed and configured (if ReactComponent imports detected)
+
+  - id: 5
+    name: Proxy Config Translation
+    status: not_started
+    description: Translate setupProxy.js to Vite server.proxy config, or document as failed if too complex
+    acceptance:
+      - setupProxy.js translated to server.proxy in vite.config (if it existed)
+      - setupProxy.js removed after successful translation
+      - proxy config documented in run-log.md if translation failed
+
+  - id: 6
+    name: Build Verification
+    status: not_started
+    description: Run verify-full.sh, fix remaining build errors, and confirm react-scripts is removed
+    acceptance:
+      - verify-full.sh passes clean
+      - react-scripts not present in package.json dependencies or devDependencies
+      - vite build produces output without errors
+      - no REACT_APP_ in dist/ or build/ output
+
+  - id: 7
+    name: CI/CD Env Var Flagging
+    status: not_started
+    description: Find all REACT_APP_ references in CI/CD files and document them for manual update
+    acceptance:
+      - all CI/CD files searched for REACT_APP_ references
+      - each reference documented in run-log.md with file path and line number
+      - changelog.md updated with Manual Action Required section (if any found)
+
+  - id: 8
+    name: Jest to Vitest Migration
+    status: not_started
+    description: Replace Jest with Vitest, migrate test globals, update test script, remove Jest packages
+    acceptance:
+      - vitest installed and configured in vite.config.ts test section
+      - jest.fn/mock/spyOn replaced with vi.fn/mock/spyOn across test files
+      - npm test runs vitest and all tests pass
+      - jest and @types/jest removed from package.json
+      - react-scripts fully removed from package.json
