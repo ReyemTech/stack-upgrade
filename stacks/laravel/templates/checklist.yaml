@@ -49,13 +49,14 @@ phases:
       - all tests pass
 
   - id: 6
-    name: Config Drift + README
+    name: Config Drift + README + CI
     status: not_started
-    description: Reconcile config files against latest Laravel stubs and update version references in project README
+    description: Reconcile config files against latest Laravel stubs, update version references in project README, and fix CI runtime versions
     acceptance:
       - new config keys added
       - deprecated keys removed
       - README version references updated (if present)
+      - CI runtime versions compatible with upgraded dependencies (Node, PHP)
       - verify-full.sh passes
 
   - id: 7
