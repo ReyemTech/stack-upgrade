@@ -19,7 +19,7 @@ Every time you start (including restarts):
 2. Execute the phase steps from `.upgrade/plan.md`
 3. Run `.upgrade/scripts/verify-fast.sh` after every file change
 4. Run `.upgrade/scripts/verify-full.sh` before marking a phase complete
-5. If verify passes: update `.upgrade/checklist.yaml` to `status: complete`, update `.upgrade/changelog.md`, commit, move to next phase
+5. If verify passes: update `.upgrade/checklist.yaml` to `status: complete`, update `.upgrade/changelog.md` (MANDATORY — this becomes the PR body), commit, move to next phase
 6. If verify fails: fix the issue, re-run verify, repeat up to 3 attempts
 7. After 3 failed attempts on the same error: log the failure in `.upgrade/run-log.md`, set phase `status: failed`, move on
 
@@ -36,12 +36,14 @@ Every time you start (including restarts):
   - Decisions you made (e.g., skipping a package, choosing a migration path)
   - Evidence (test output, error messages)
 
-### Changelog
-- After completing each phase, update `.upgrade/changelog.md`:
-  - Add rows to the dependency table: Package | From | To | Notes
-  - Add entries to the Removed Packages section if any were removed
-  - Add notes about config changes, breaking changes fixed, etc.
-- This changelog will be used as the PR body, so make it useful for reviewers
+### Changelog (MANDATORY — do NOT skip)
+- **Before every phase commit**, update `.upgrade/changelog.md`. This file becomes the PR body — if a phase is missing from the changelog, reviewers won't know it happened.
+- For each phase, add:
+  - Rows to the dependency table: Package | From | To | Notes
+  - Entries to the Removed Packages section if any were removed
+  - Notes about config changes, breaking changes fixed, etc.
+  - A Phase Summary entry with status and one-line description
+- The phase commit MUST include the updated changelog. Verify the changelog reflects the phase before committing.
 
 ### Constraints
 - **Upgrade everything to latest** — the goal is eliminating tech debt and security risks. If a major version upgrade requires code changes (namespace migrations, API changes, config updates), DO those changes. This is expected.
@@ -108,6 +110,20 @@ php artisan config:publish --force  # (review diff, don't blindly accept)
 # Check for deprecations
 php artisan test --log-deprecations-while-testing
 ```
+
+## CI Runtime Check (Final Phase)
+
+After all upgrade phases are complete, scan the project's CI configuration for runtime version mismatches caused by the upgrade:
+
+1. Look for CI config files: `.github/workflows/*.yml`, `.gitlab-ci.yml`, `bitbucket-pipelines.yml`, `.circleci/config.yml`, `Jenkinsfile`
+2. Check for **Node.js version** — if you upgraded Vite or other tools that raised the minimum Node version, flag any CI step using an older Node (e.g., `setup-node` with `node-version: 18` when Vite 7 requires 20.19+)
+3. Check for **PHP version** — if you bumped the PHP constraint, flag any CI step using an older PHP version
+4. If mismatches are found:
+   - Update the CI config files to use compatible runtime versions
+   - Log the changes in `.upgrade/run-log.md`
+   - Add a "CI Changes" section to `.upgrade/changelog.md`
+   - Include the CI files in the phase commit
+5. If no CI config files exist, skip this step
 
 ## Error Recovery
 
